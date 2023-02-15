@@ -111,9 +111,17 @@ If so, the function returns True, indicating that the input string is recognized
         ...        
 ```
 
-## Conclusions / Screenshots / Results
+## Conclusions / Screenshots
 
+### Conclusion
+By carrying out the laboratory work, I have acquired a deeper understanding of formal languages and successfully 
+translated a grammar and finite automaton into code. The project enabled me to acquire essential skills such as designing
+a grammar class, generating acceptable character strings, and converting objects into finite automata. These skills 
+reinforced my comprehension of the fundamental theory. The creation of the conversion method from grammar to a finite 
+automaton and the verification of word validity were the most enlightening aspects of the project. They revealed the 
+connections between them and how formal languages function as a whole. Furthermore, it laid the groundwork for more 
+advanced projects in this field.
+
+### Screenshots
 ![img_1.png](img_1.png)
 ![img.png](img.png)
-
-## References
