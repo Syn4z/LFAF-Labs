@@ -22,21 +22,21 @@ to form strings in the language.
 ***  
 * Provide the initial setup for the evolving project that I will work on during this semester. Need to do the following:
 
-* a. Create a local && remote repository of a VCS hosting service;
+  * a. Create a local && remote repository of a VCS hosting service;
 
-* b. Choose a programming language;
+  * b. Choose a programming language;
 
-* c. Create a separate folder where to be keeping the report. 
+  * c. Create a separate folder where to be keeping the report. 
 ***
 * According to my variant number, get the grammar definition and do the following tasks:
 
-* a. Implement a type/class for my grammar;
+  * a. Implement a type/class for my grammar;
 
-* b. Add one function that would generate 5 valid strings from the language expressed by my given grammar;
+  * b. Add one function that would generate 5 valid strings from the language expressed by my given grammar;
 
-* c. Implement some functionality that would convert and object of type Grammar to one of type Finite Automaton;
+  * c. Implement some functionality that would convert and object of type Grammar to one of type Finite Automaton;
 
-* d. For the Finite Automaton, add a method that checks if an input string can be obtained via the state transition from it;
+  * d. For the Finite Automaton, add a method that checks if an input string can be obtained via the state transition from it;
 
 
 
