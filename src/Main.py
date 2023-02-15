@@ -1,53 +1,50 @@
 from grammar.Grammar import Grammar
-from grammar.Production import Production
-from automaton.FiniteAutomaton import FiniteAutomaton
 
-"""
-class Main: {
-
-}
-"""
 
 if __name__ == '__main__':
-    pass
 
-    # VN = ["S", "D", "F"]
-    # VT = ["a", "b", "c", "d"]
-    # P = Production(["S", "D", "F"], ["aS", "bS", "cD", "dD", "bF", "a", "bs", "a"])
+    startingCharacter = 'S'
+    nonTerminal = ['S', 'D', 'F']
+    terminal = ['a', 'b', 'c', 'd']
+    productions = {
+        'S': ["aS", "bS", "cD"],
+        'D': ["dD", "bF", "a"],
+        'F': ["bS", "a"]
+    }
+    # Task a
+    print("\na) Grammar:")
+    print("Non-terminal symbols: ", nonTerminal)
+    print("Terminal symbols: ", terminal)
+    print("Starting character: ", startingCharacter)
+    print("Productions: ", productions)
+    grammar = Grammar(startingCharacter, terminal, nonTerminal, productions)
 
-    grammar = Grammar("S", [
-        Production("S", ["aS", "bS", "cD"]),
-        Production("D", ["dD", "bF", "a"]),
-        Production("F", ["bS", "a"])
-    ])
+    # Task b
+    print("\nb) Generated words:")
+    for i in range(5):
+        word = grammar.generateWord()
+        print(str(i + 1) + '. ' + word)
 
-    # Generate a word from the grammar.
-    word = "-> ".join(grammar.generateWord())
-    print(word)
+    # Task c
+    finiteAutomaton = grammar.toFiniteAutomaton()
+    print("\nc) Finite automaton:")
+    print("Alphabet: ", finiteAutomaton.getAlphabet())
+    print("States: ", finiteAutomaton.getStates())
+    print("Initial state: ", finiteAutomaton.getStartState())
+    print("Accepting states: ", finiteAutomaton.getAcceptStates())
+    print(finiteAutomaton.getTransitions())
 
+    # Task d
+    validWord1 = grammar.generateWord()
+    validWord2 = grammar.generateWord()
 
-    automaton = FiniteAutomaton(
-        possibleStates=[("S", 0), ("A", 0), ("B", 0), ("C", 0), ("a", 1), ("b", 1), ("c", 1), ("d", 1), ("e", 1), ("f", 1)],
-        initialState=("S", 0),
-        finalState=[("a", 1), ("b", 1), ("c", 1), ("d", 1), ("e", 1), ("f", 1)],
-        transitions=[
-            (("S", 0), ("A", 0)),
-            (("S", 0), ("B", 0)),
-            (("S", 0), ("C", 0)),
-            (("A", 0), ("a", 1)),
-            (("A", 0), ("b", 1)),
-            (("B", 0), ("c", 1)),
-            (("B", 0), ("d", 1)),
-            (("C", 0), ("e", 1)),
-            (("C", 0), ("f", 1)),
-        ],
-    )
-
-    # Verify if a word is valid.
-    word = "f"
-    valid = automaton.isValid(word)
-    print(f"The word '{word}' is valid: {valid}")
-
-    word = "abcdef"
-    valid = automaton.isValid(word)
-    print(f"The word '{word}' is valid: {valid}")
+    print("\nd) Check if a word is valid:")
+    print("baca", "-", finiteAutomaton.wordIsValid("baca"))
+    print("abcdeee", "-", finiteAutomaton.wordIsValid("abcdeee"))
+    print("acdba", "-", finiteAutomaton.wordIsValid("acdba"))
+    print("dbbbaacc", "-", finiteAutomaton.wordIsValid("dbbbaacc"))
+    print("(Empty)", "-", finiteAutomaton.wordIsValid(""))
+    print("010", "-", finiteAutomaton.wordIsValid("010"))
+    print(validWord1, "-", finiteAutomaton.wordIsValid(validWord1))
+    print("abc1", "-", finiteAutomaton.wordIsValid("abc1"))
+    print(validWord2, "-", finiteAutomaton.wordIsValid(validWord2))
