@@ -42,8 +42,8 @@ class Grammar:
                     nextState = 'X'
                 transitionLabel = rightSide[0]
                 transitions.append(Transition(nonTerminal, nextState, transitionLabel))
-        automaton = FiniteAutomaton(transitions)
         states.add('X')
+        automaton = FiniteAutomaton(states, self.terminal, transitions, self.startSymbol, finalStates)
         automaton.setStates(states)
         automaton.setStartState(str(self.startSymbol))
         automaton.setAcceptStates(finalStates)

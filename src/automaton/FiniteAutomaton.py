@@ -40,19 +40,12 @@ class FiniteAutomaton:
 
 
 class FiniteAutomaton:
-    def __init__(self, transitions):
-        self.states = set()
-        self.alphabet = list()
-        self.transitions = transitions
-        self.startState = None
-        self.acceptStates = set()
-
-    def set_automaton(self, states, alphabet, transitions, start_state, accept_states):
+    def __init__(self, states: set, alphabet: list, transitions, startState, acceptStates: set):
         self.states = states
         self.alphabet = alphabet
         self.transitions = transitions
-        self.startState = start_state
-        self.acceptStates = accept_states
+        self.startState = startState
+        self.acceptStates = acceptStates
 
     def getStates(self):
         return self.states
@@ -104,4 +97,32 @@ class FiniteAutomaton:
             if len(labels) != len(set(labels)):
                 return 'Non-Deterministic'
         return 'Deterministic'
+
+    def convertToRegularGrammar(self):
+        nonTerminalVariables = self.states
+        terminalVariables = self.alphabet
+        startingCharacter = self.startState
+
+        productions = []
+
+        # create productions for each transition
+        for state in self.states:
+            for t in self.transitions:
+                if t.getCurrentState() == state and t.getTransitionLabel() != "e":
+                    production = state + "->" + str(t.getTransitionLabel()) + t.getNextState()
+                    productions.append(production)
+
+        # create productions for each final state
+        for finalState in self.acceptStates:
+            production = finalState + "->" + "ε"
+            productions.append(production)
+
+        # create the array of Production objects
+        productionsArray = []
+        for production in productions:
+            lhs, rhs = production.split("->")
+            productionsArray.append(Production(lhs, rhs))
+
+        # create and return the Grammar object
+        return Grammar(nonTerminalVariables, terminalVariables, productionsArray, startingCharacter)
 
