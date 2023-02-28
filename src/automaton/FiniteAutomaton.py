@@ -143,4 +143,3 @@ class FiniteAutomaton:
                               startState=dfa_startState,
                               acceptStates=dfa_acceptStates)
         return dfa
-

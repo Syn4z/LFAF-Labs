@@ -21,9 +21,12 @@ class Grammar:
         randomRightSide = random.choice(rightSide)
         word = ''
         newRightSide = []
-        for nr, el in enumerate(randomRightSide):
-            if el == 'q':
-                newRightSide = [randomRightSide[:nr], randomRightSide[nr:]]
+        if "q" in character:
+            for nr, el in enumerate(randomRightSide):
+                if el == 'q':
+                    newRightSide = [randomRightSide[:nr], randomRightSide[nr:]]
+        else:
+            newRightSide = randomRightSide
         for rightChar in newRightSide:
             word += self.generateWordHelper(rightChar)
         return word

@@ -46,6 +46,9 @@ if __name__ == '__main__':
     
     '''
 
+    # Lab 2
+    # -------------------------------
+
     startingCharacter = 'S'
     nonTerminal = ['S', 'D', 'F']
     terminal = ['a', 'b', 'c', 'd']
@@ -92,12 +95,7 @@ if __name__ == '__main__':
     print("Productions: ", gr1.productions)
 
     print("\nSome generated words by the grammar converted from the FA: ")
-    w1 = gr1.generateWord()
-    w2 = gr1.generateWord()
-    w3 = gr1.generateWord()
-    print(w1)
-    print(w2)
-    print(w3)
+    print(gr1.generateWord(), "\n" + gr1.generateWord(), "\n" + gr1.generateWord())
 
     # Check if Deterministic, 3b
     print("\n3b) Determine is my FA deterministic: \n", fa1.isDeterministic())
