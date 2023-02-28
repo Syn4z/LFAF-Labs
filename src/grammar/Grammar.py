@@ -14,12 +14,15 @@ class Grammar:
     def generateWord(self) -> str:
         return self.generateWordHelper(self.startSymbol)
 
-    def generateWordHelper(self, character: str) -> str:
+    def generateWordHelper(self, character) -> str:
         if character in self.terminal:
             return character
         rightSide = self.productions[character]
         randomRightSide = random.choice(rightSide)
         word = ''
+        for el in randomRightSide:
+            if el == 'q':
+                randomRightSide = el # TO DO
         for rightChar in randomRightSide:
             word += self.generateWordHelper(rightChar)
         return word
@@ -54,8 +57,9 @@ class Grammar:
         is_type_3 = True
         for nonTerminal in self.nonTerminal:
             for production in self.productions[nonTerminal]:
-                if len(production) > 2 or (production[0] not in self.terminal and production[0] not in self.nonTerminal) \
-                        or (len(production) == 2 and production[1] not in self.nonTerminal):
+                if len(production) > 2 or (production[0] not in self.terminal and production[0]
+                                           not in self.nonTerminal) or (
+                        len(production) == 2 and production[1] not in self.nonTerminal):
                     is_type_3 = False
                     break
         if is_type_3:

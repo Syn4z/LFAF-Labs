@@ -1,3 +1,5 @@
+import random
+
 import graphviz
 from grammar.Grammar import Grammar
 from src.automaton.FiniteAutomaton import FiniteAutomaton
@@ -74,7 +76,7 @@ if __name__ == '__main__':
                           startState='q0',
                           acceptStates={'q3'})
 
-    # Task 3a
+    # Function to classify the grammar based on Chomsky hierarchy, 3a
     gr2 = gr1.convertToRegularGrammar(Grammar)
     print("\n3a) Regular Grammar converted from FA:")
 
@@ -91,10 +93,24 @@ if __name__ == '__main__':
     print("Starting character: ", gr2.startSymbol)
     print("Productions: ", gr2.productions)
 
+
+    gr2.generateWord()
+
     # Check if Deterministic, 3b
     print("\n3b) IsDeterministic? \n", gr1.isDeterministic())
 
-    # Create a directed graph using graphviz
+    # Convert NDFA to DFA, 3c
+    dfa = gr1.convertToDFA()
+
+    print("Alphabet: ", dfa.getAlphabet())
+    print("States: ", dfa.getStates())
+    print("Initial state: ", dfa.getStartState())
+    print("Accepting states: ", dfa.getAcceptStates())
+    print("Transitions: ", dfa.getTransitions())
+
+    print(dfa.isDeterministic())
+
+    # Represent the finite automaton graphically, 3d
     graph = graphviz.Digraph()
 
     # Add the states and transitions to the graph
@@ -110,14 +126,3 @@ if __name__ == '__main__':
 
     # Save the graph as a PDF file
     graph.render('dfa', view=True)
-
-    # Convert NDFA to DFA, 3c
-    dfa = gr1.convertToDFA()
-
-    print("Alphabet: ", dfa.getAlphabet())
-    print("States: ", dfa.getStates())
-    print("Initial state: ", dfa.getStartState())
-    print("Accepting states: ", dfa.getAcceptStates())
-    print("Transitions: ", dfa.getTransitions())
-
-    print(dfa.isDeterministic())

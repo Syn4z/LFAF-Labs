@@ -54,6 +54,7 @@ class FiniteAutomaton:
                 return 'Non-Deterministic'
         return 'Deterministic'
 
+    '''
     def convertToRegularGrammar(self, Grammar):
         nonTerminalVariables = self.states
         terminalVariables = self.alphabet
@@ -75,6 +76,34 @@ class FiniteAutomaton:
 
         # create and return the Grammar object
         return Grammar(startingCharacter, terminalVariables, nonTerminalVariables, productions)
+    '''
+
+    def convertToRegularGrammar(self, Grammar):
+        productions = {}
+
+        # Step 1: Add a new start symbol S
+        startSymbol = self.startState
+        productions[startSymbol] = [self.startState]
+
+        # Step 2: Create a new non-terminal symbol for each state
+        for state in self.states:
+            productions[state] = []
+
+        # Step 3: Add production rules for accept states
+        for acceptState in self.acceptStates:
+            for state in self.states:
+                if acceptState == state:
+                    productions[state].append("ε")
+
+        # Step 4: Add production rules for transitions
+        for transition in self.transitions:
+            q, a, p = transition
+            productions[q].append(a + p)
+
+        # Create Grammar object
+        nonTerminal = list(self.states)
+        terminal = self.alphabet
+        return Grammar(startSymbol, terminal, nonTerminal, productions)
 
     def convertToDFA(self):
         # First, create a set of all possible combinations of NFA states
