@@ -98,8 +98,8 @@ class FiniteAutomaton:
                 return 'Non-Deterministic'
         return 'Deterministic'
 
-    def convertToRegularGrammar(self):
-        nonTerminalVariables = self.states
+    def convertToRegularGrammar(self, Grammar):
+        nonTerminalVariables = list(self.states)
         terminalVariables = self.alphabet
         startingCharacter = self.startState
 
@@ -109,20 +109,16 @@ class FiniteAutomaton:
         for state in self.states:
             for t in self.transitions:
                 if t.getCurrentState() == state and t.getTransitionLabel() != "e":
-                    production = state + "->" + str(t.getTransitionLabel()) + t.getNextState()
+                    production = (state, t.getTransitionLabel() + t.getNextState())
                     productions.append(production)
 
         # create productions for each final state
         for finalState in self.acceptStates:
-            production = finalState + "->" + "ε"
+            production = (finalState, "ε")
             productions.append(production)
 
-        # create the array of Production objects
-        productionsArray = []
-        for production in productions:
-            lhs, rhs = production.split("->")
-            productionsArray.append(Production(lhs, rhs))
-
         # create and return the Grammar object
-        return Grammar(nonTerminalVariables, terminalVariables, productionsArray, startingCharacter)
+        return Grammar(nonTerminalVariables, terminalVariables, productions, startingCharacter)
+
+
 

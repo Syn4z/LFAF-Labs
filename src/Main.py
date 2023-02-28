@@ -95,4 +95,6 @@ if __name__ == '__main__':
                           startState='q0',
                           acceptStates={'q3'})
 
+    gr2 = gr1.convertToRegularGrammar(Grammar)
+    print(gr2.terminal)
     print(gr1.getTransitions())
