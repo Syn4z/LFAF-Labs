@@ -20,10 +20,11 @@ class Grammar:
         rightSide = self.productions[character]
         randomRightSide = random.choice(rightSide)
         word = ''
-        for el in randomRightSide:
+        newRightSide = []
+        for nr, el in enumerate(randomRightSide):
             if el == 'q':
-                randomRightSide = el # TO DO
-        for rightChar in randomRightSide:
+                newRightSide = [randomRightSide[:nr], randomRightSide[nr:]]
+        for rightChar in newRightSide:
             word += self.generateWordHelper(rightChar)
         return word
 

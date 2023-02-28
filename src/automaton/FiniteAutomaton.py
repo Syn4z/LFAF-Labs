@@ -33,6 +33,26 @@ class FiniteAutomaton:
     def getTransitions(self):
         return self.transitions
 
+    def epsilon_closure(self, states, transitions):
+        e_closure = set(states)
+        queue = list(states)
+        while queue:
+            state = queue.pop(0)
+            for transition in transitions:
+                if transition[0] == state and transition[1] == 'ε':  # epsilon transition
+                    if transition[2] not in e_closure:
+                        e_closure.add(transition[2])
+                        queue.append(transition[2])
+        return e_closure
+
+    def move(self, states, symbol, transitions):
+        next_states = set()
+        for state in states:
+            for transition in transitions:
+                if transition[0] == state and transition[1] == symbol:
+                    next_states.add(transition[2])
+        return next_states
+
     def wordIsValid(self, word):
         currentState = self.startState[0]
         for c in word:
@@ -53,30 +73,6 @@ class FiniteAutomaton:
             if len(labels) != len(set(labels)):
                 return 'Non-Deterministic'
         return 'Deterministic'
-
-    '''
-    def convertToRegularGrammar(self, Grammar):
-        nonTerminalVariables = self.states
-        terminalVariables = self.alphabet
-        startingCharacter = self.startState
-
-        productions = []
-
-        # create productions for each transition
-        for state in self.states:
-            for t in self.transitions:
-                if t[0] == state and t[1] != "e":
-                    production = state + "->" + str(t[1]) + "->" + t[2]
-                    productions.append(production)
-
-        # create productions for each final state
-        for finalState in self.acceptStates:
-            production = finalState + "->" "ε"
-            productions.append(production)
-
-        # create and return the Grammar object
-        return Grammar(startingCharacter, terminalVariables, nonTerminalVariables, productions)
-    '''
 
     def convertToRegularGrammar(self, Grammar):
         productions = {}
@@ -105,59 +101,46 @@ class FiniteAutomaton:
         terminal = self.alphabet
         return Grammar(startSymbol, terminal, nonTerminal, productions)
 
-    def convertToDFA(self):
-        # First, create a set of all possible combinations of NFA states
-        powerSet = self.getPowerSet(self.states)
+    def convertNFAtoDFA(self):
+        # Initialize variables
+        dfa_states = set()
+        dfa_alphabet = self.alphabet
+        dfa_transitions = []
+        dfa_startState = frozenset(self.epsilon_closure({self.startState}, self.transitions))
+        dfa_acceptStates = set()
 
-        # Initialize the new DFA
-        dfaStates = set()
-        dfaTransitions = []
-        dfaStartState = self.startState
-        dfaAcceptStates = set()
+        queue = [dfa_startState]
+        processed_states = set()
 
-        # Process each set of NFA states in the power set
-        for stateSet in powerSet:
-            stateSet = frozenset(stateSet)  # convert frozenset to set
-            dfaStates.add(stateSet)
+        # Loop until there are no more states to visit
+        while queue:
+            state_set = queue.pop(0)
+            if state_set in processed_states:
+                continue
+            processed_states.add(state_set)
 
-            # Determine the set of possible transitions for this set of states
-            transitions = {}
-            for state in stateSet:
-                if state in self.transitions:
-                    for transition in self.transitions[state]:
-                        if transition[0] in self.alphabet:
-                            if transition[0] not in transitions:
-                                transitions[transition[0]] = set()
-                            transitions[transition[0]].add(transition[1])
+            # Add the current state set to the DFA states
+            dfa_states.add(state_set)
 
-            # Add the transitions for this DFA state
-            for symbol in self.alphabet:
-                if symbol in transitions:
-                    nextStateSet = frozenset(transitions[symbol])
-                    if nextStateSet not in dfaStates:
-                        dfaStates.add(nextStateSet)
-                    dfaTransitions.append((stateSet, symbol, nextStateSet))
+            # Check if the current state set contains an accept state from the NDFA
+            for accept_state in self.acceptStates:
+                if accept_state in state_set:
+                    dfa_acceptStates.add(state_set)
+                    break
 
-            # Check if this set of NFA states contains any accept states
-            for acceptState in self.acceptStates:
-                if acceptState in stateSet:
-                    dfaAcceptStates.add(stateSet)
+            # Calculate transitions for the current state set
+            for symbol in dfa_alphabet:
+                next_states = self.epsilon_closure(self.move(state_set, symbol, self.transitions), self.transitions)
+                if len(next_states) > 0:
+                    dfa_transitions.append((state_set, symbol, frozenset(next_states)))
+                    if frozenset(next_states) not in processed_states:
+                        queue.append(frozenset(next_states))
 
-        # Create the new DFA object and return it
-        dfa = FiniteAutomaton(dfaStates, self.alphabet, dfaTransitions, dfaStartState, dfaAcceptStates)
+        # Create the DFA object
+        dfa = FiniteAutomaton(states=dfa_states,
+                              alphabet=dfa_alphabet,
+                              transitions=dfa_transitions,
+                              startState=dfa_startState,
+                              acceptStates=dfa_acceptStates)
         return dfa
 
-    def getPowerSet(self, originalSet):
-        # Helper function to generate the power set of a set
-        if len(originalSet) == 0:
-            return [[]]
-        else:
-            element = originalSet.pop()
-            powerSet = self.getPowerSet(originalSet)
-            newSet = []
-            for subset in powerSet:
-                newSet.append(subset)
-                newSubset = subset.copy()
-                newSubset.append(element)
-                newSet.append(newSubset)
-            return newSet
