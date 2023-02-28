@@ -1,5 +1,4 @@
 from src.automaton.FiniteAutomaton import FiniteAutomaton
-from src.automaton.Transition import Transition
 from typing import List, Dict
 import random
 
@@ -41,7 +40,7 @@ class Grammar:
                 else:
                     nextState = 'X'
                 transitionLabel = rightSide[0]
-                transitions.append(Transition(nonTerminal, nextState, transitionLabel))
+                transitions.append((nonTerminal, transitionLabel, nextState))
         states.add('X')
         automaton = FiniteAutomaton(states, self.terminal, transitions, self.startSymbol, finalStates)
         automaton.setStates(states)

@@ -1,17 +1,8 @@
+import graphviz
 from grammar.Grammar import Grammar
 from src.automaton.FiniteAutomaton import FiniteAutomaton
-from src.automaton.Transition import Transition
 
 if __name__ == '__main__':
-    startingCharacter = 'S'
-    nonTerminal = ['S', 'D', 'F']
-    terminal = ['a', 'b', 'c', 'd']
-    productions = {
-        'S': ["aS", "bS", "cD"],
-        'D': ["dD", "bF", "a"],
-        'F': ["bS", "a"]
-    }
-
     '''
     Lab 1
     ------------------------------------------------
@@ -55,46 +46,78 @@ if __name__ == '__main__':
     
     '''
 
-    # Check the grammar Type
+    startingCharacter = 'S'
+    nonTerminal = ['S', 'D', 'F']
+    terminal = ['a', 'b', 'c', 'd']
+    productions = {
+        'S': ["aS", "bS", "cD"],
+        'D': ["dD", "bF", "a"],
+        'F': ["bS", "a"]
+    }
+
+    # Check the grammar Type, 2a
     grammar = Grammar(startingCharacter, terminal, nonTerminal, productions)
     grammarType = grammar.classifyGrammar()
-    print(grammarType)
+    print("2a) Grammar Type: \n", grammarType)
 
-    finiteAutomaton = grammar.toFiniteAutomaton()
-
-    # Check if Deterministic
-    print(finiteAutomaton.isDeterministic())
-
-    # Set the fa
-    '''
-    finiteAutomaton.set_automaton(states={'q0', 'q1', 'q2', 'q3'},
-                                  alphabet=['a', 'b', 'c'],
-                                  transitions=[
-                                      Transition('q0', 'q0', 'a'),
-                                      Transition('q0', 'q1', 'a'),
-                                      Transition('q1', 'q2', 'b'),
-                                      Transition('q2', 'q3', 'c'),
-                                      Transition('q3', 'q3', 'c'),
-                                      Transition('q2', 'q2', 'a')
-                                  ],
-                                  start_state='q0',
-                                  accept_states={'q3'})
-    '''
-
-    # Conversion from fa to regular grammar
+    # Conversion from FA to regular grammar
     gr1 = FiniteAutomaton(states={'q0', 'q1', 'q2', 'q3'},
                           alphabet=['a', 'b', 'c'],
                           transitions=[
-                              Transition('q0', 'q0', 'a'),
-                              Transition('q0', 'q1', 'a'),
-                              Transition('q1', 'q2', 'b'),
-                              Transition('q2', 'q3', 'c'),
-                              Transition('q3', 'q3', 'c'),
-                              Transition('q2', 'q2', 'a')
+                              ('q0', 'a', 'q0'),
+                              ('q0', 'a', 'q1'),
+                              ('q1', 'b', 'q2'),
+                              ('q2', 'c', 'q3'),
+                              ('q3', 'c', 'q3'),
+                              ('q2', 'a', 'q2')
                           ],
                           startState='q0',
                           acceptStates={'q3'})
 
+    # Task 3a
     gr2 = gr1.convertToRegularGrammar(Grammar)
-    print(gr2.terminal)
-    print(gr1.getTransitions())
+    print("\n3a) Regular Grammar converted from FA:")
+
+    print("\nFinite automaton:")
+    print("Alphabet: ", gr1.getAlphabet())
+    print("States: ", gr1.getStates())
+    print("Initial state: ", gr1.getStartState())
+    print("Accepting states: ", gr1.getAcceptStates())
+    print("Transitions: ", gr1.getTransitions())
+
+    print("\nRegular Grammar:")
+    print("NonTerminal symbols: ", gr2.nonTerminal)
+    print("Terminal symbols: ", gr2.terminal)
+    print("Starting character: ", gr2.startSymbol)
+    print("Productions: ", gr2.productions)
+
+    # Check if Deterministic, 3b
+    print("\n3b) IsDeterministic? \n", gr1.isDeterministic())
+
+    # Create a directed graph using graphviz
+    graph = graphviz.Digraph()
+
+    # Add the states and transitions to the graph
+    for state in gr1.getStates():
+        shape = 'circle' if state not in gr1.getAcceptStates() else 'doublecircle'
+        graph.node(state, shape=shape)
+    for (from_state, symbol, to_state) in gr1.getTransitions():
+        graph.edge(from_state, to_state, label=symbol)
+
+    # Set the start state of the DFA
+    graph.node('', shape='none', label='', width='0')
+    graph.edge('', gr1.getStartState())
+
+    # Save the graph as a PDF file
+    graph.render('dfa', view=True)
+
+    # Convert NDFA to DFA, 3c
+    dfa = gr1.convertToDFA()
+
+    print("Alphabet: ", dfa.getAlphabet())
+    print("States: ", dfa.getStates())
+    print("Initial state: ", dfa.getStartState())
+    print("Accepting states: ", dfa.getAcceptStates())
+    print("Transitions: ", dfa.getTransitions())
+
+    print(dfa.isDeterministic())
