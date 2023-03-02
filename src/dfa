@@ -1,7 +1,7 @@
 digraph {
-	q1 [shape=circle]
-	q2 [shape=circle]
 	q3 [shape=doublecircle]
+	q2 [shape=circle]
+	q1 [shape=circle]
 	q0 [shape=circle]
 	q0 -> q0 [label=a]
 	q0 -> q1 [label=a]
