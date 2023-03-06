@@ -170,3 +170,10 @@ Transitions:  [(frozenset({'q0'}), 'a', frozenset({'q1', 'q0'})), (frozenset({'q
 
 Determine if converted DFA is true: 
  Deterministic
+
+3d) The finite automaton graphically:
+
+![img_2.png](img_2.png)
+
+## References
+https://github.com/DrVasile/FLFA-Labs/blob/master/2_FiniteAutomata/task.md  
