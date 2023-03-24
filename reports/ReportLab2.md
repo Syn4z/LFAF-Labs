@@ -43,7 +43,11 @@ single state in the DFA.
 
 ## Implementation description
 
-* Made rules for each grammar type on the Chomsky classification.
+Made rules for each grammar type on the Chomsky classification. The function starts by checking if the grammar is a
+Type 3 grammar by iterating over all non-terminals and productions of the grammar, and checking if each production 
+satisfies the conditions of a regular grammar. If the grammar is not Type 3, the function proceeds to check if it is a 
+Type 2 grammar by verifying with the precedent steps and so on until the Type 1. If it's not even Type 1, the grammar is
+classified as Type 0 and if the grammar don't fit any of the rules, or it's invalid it returns Type None.
 
 ```
     ...
@@ -60,8 +64,13 @@ single state in the DFA.
         ...    
 ```
 
-* The function to convert a finite automaton to regular grammar, add new start symbol, non-terminal symbol and add 
-rules
+The function to convert a finite automaton to regular grammar, add new start symbol, non-terminal symbol and add 
+rules. Firstly, the function creates a new start symbol S for the regular grammar and adds it to the production rules as a new 
+non-terminal symbol. The start symbol S is defined as the start state of the NFA. Secondly, the function creates a new 
+non-terminal symbol in the production rules. Next the function adds a production rule to the corresponding non-terminal
+symbol in the production rules. The production rule consists of the empty string ε. Next the function adds a production 
+rule to the corresponding non-terminal symbol in the production rules. The production rule consists of the input symbol 
+and the destination state of the transition. Lastly the function returns a new Grammar object.
 
 ```
     ...
@@ -82,7 +91,12 @@ rules
     ...
 ```
 
-* This function checks if an FA is deterministic or non-deterministic.
+This function checks if an FA is deterministic or non-deterministic. The function finds all transitions that originate 
+from the current state. It extracts the input symbols (labels) associated with those transitions. It then checks if there
+are any duplicate input symbols in the list of labels using the set function to remove duplicates. If there are duplicates, 
+this means that there are multiple transitions for the same input symbol, indicating that the FA is not deterministic.
+If there are no duplicates for any state, the function returns 'Deterministic'. Otherwise, it returns 'Non-Deterministic'.
+
 
 ```
       ...
@@ -94,17 +108,46 @@ rules
         ...        
 ```
 
-* This is where the transitions for the DFA are calculated.
+The function initializes the variables 'dfa_states, dfa_alphabet, dfa_transitions, dfa_startState' and 'dfa_acceptStates'. 
+The 'dfa_states' set will contain the states of the new DFA, 'dfa_alphabet' will be the same as the alphabet of the NFA, 
+'dfa_transitions' will contain the transitions of the new DFA, 'dfa_startState' will be the start state of the new DFA, 
+and 'dfa_acceptStates' will contain the accept states of the new DFA. The function then initializes a queue with the start
+state of the new DFA, which is the epsilon closure of the start state of the NFA. It also initializes a set 'processed_states'
+to keep track of the states that have been processed. The function then enters a loop that continues until the queue
+is empty. In each iteration, it removes a state 'state_set' from the queue, calculates its epsilon closure, and adds 
+it to the DFA states 'dfa_states'. It checks if the current state set contains an accept state from the NFA and adds 
+it to the DFA accept states set if necessary. For each symbol in the DFA alphabet, the function calculates the next state
+'next_states' by moving from the current state set on that symbol, and takes the epsilon closure of the resulting set. 
+If the resulting set is not empty, it adds the transition (state_set, symbol, frozenset(next_states)) to the DFA transitions 
+'dfa_transitions'. It also adds the resulting set to the queue if it has not already been processed.
+Finally, the function creates a new DFA object using the variables 'dfa_states, dfa_alphabet, dfa_transitions, dfa_startState'
+and 'dfa_acceptStates' and returns it.
 
 ```
-      ...
+        ...
+        while queue:
+            state_set = queue.pop(0)
+            if state_set in processed_states:
+                continue
+            processed_states.add(state_set)
+
+            # Add the current state set to the DFA states
+            dfa_states.add(state_set)
+
+            # Check if the current state set contains an accept state from the NDFA
+            for accept_state in self.acceptStates:
+                if accept_state in state_set:
+                    dfa_acceptStates.add(state_set)
+                    break
+
+            # Calculate transitions for the current state set
             for symbol in dfa_alphabet:
                 next_states = self.epsilon_closure(self.move(state_set, symbol, self.transitions), self.transitions)
                 if len(next_states) > 0:
                     dfa_transitions.append((state_set, symbol, frozenset(next_states)))
                     if frozenset(next_states) not in processed_states:
                         queue.append(frozenset(next_states))
-            ...
+        ...
 ```
 
 ## Conclusions / Results
@@ -173,7 +216,7 @@ Determine if converted DFA is true:
 
 3d) The finite automaton graphically:
 
-![img_2.png](img_2.png)
+![img_2.png](images/img_2.png)
 
 ## References
 https://github.com/DrVasile/FLFA-Labs/blob/master/2_FiniteAutomata/task.md  

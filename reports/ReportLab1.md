@@ -123,5 +123,5 @@ connections between them and how formal languages function as a whole. Furthermo
 advanced projects in this field.
 
 ### Screenshots
-![img_1.png](img_1.png)
-![img.png](img.png)
+![img_1.png](images/img_1.png)
+![img.png](images/img.png)
