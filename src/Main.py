@@ -11,3 +11,13 @@ if __name__ == '__main__':
 
     for token in tokens:
         print(token)
+
+    print('\n')
+
+    input_string = 'y = 9 - 7; z = 7 / 1;'
+
+    lexer = Lexer(input_string, tokensE)
+    tokens = lexer.lex()
+
+    for token in tokens:
+        print(token)

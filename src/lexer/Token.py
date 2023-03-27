@@ -1,7 +1,7 @@
 class Token:
     def __init__(self, tokens):
         self.tokens = tokens
-    # Define a dictionary of token names and their corresponding regular expressions
+
     tokens = {
         'NUMBER': r'\d+(\.\d+)?',
         'PLUS': r'\+',
