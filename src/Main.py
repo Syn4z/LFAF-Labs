@@ -9,15 +9,17 @@ if __name__ == '__main__':
     lexer = Lexer(input_string, tokensE)
     tokens = lexer.lex()
 
+    print("First segment: \n" + input_string + "\n")
     for token in tokens:
         print(token)
 
     print('\n')
 
-    input_string = 'y = 9 - 7; z = 7 / 1;'
+    input_string = 'if (z > y && x = 1): a = true'
 
     lexer = Lexer(input_string, tokensE)
     tokens = lexer.lex()
 
+    print("Second segment: \n" + input_string + "\n")
     for token in tokens:
         print(token)

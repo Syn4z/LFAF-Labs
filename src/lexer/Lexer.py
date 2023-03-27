@@ -10,17 +10,17 @@ class Lexer:
     def lex(self):
         tokens = []
         pos = 0
-        line_num = 1
-        line_start = 0
+        lineNr = 1
+        lineStart = 0
 
         # Define a function to get the next character from the input string
         def getChar():
             nonlocal pos
             if pos >= len(self.inputString):
                 return None
-            c = self.inputString[pos]
+            char = self.inputString[pos]
             pos += 1
-            return c
+            return char
 
         # Define a function to peek at the next character in the input string
         def peek():
@@ -31,19 +31,19 @@ class Lexer:
 
         # Define a function to skip whitespace and comments
         def skip_whitespace():
-            nonlocal line_num, line_start
+            nonlocal lineNr, lineStart
             while True:
-                c = peek()
-                if c is None:
+                char = peek()
+                if char is None:
                     return
-                if c.isspace():
-                    if c == '\n':
-                        line_num += 1
-                        line_start = pos
+                if char.isspace():
+                    if char == '\n':
+                        lineNr += 1
+                        lineStart = pos
                     getChar()
-                elif c == '#':
-                    while c is not None and c != '\n':
-                        c = getChar()
+                elif char == '#':
+                    while char is not None and char != '\n':
+                        char = getChar()
                 else:
                     return
 
@@ -58,7 +58,7 @@ class Lexer:
             else:
                 return None
 
-        # Define a loop that generates tokens
+        # Define a loop that generates the tokens
         while True:
             skip_whitespace()
             if peek() is None:
@@ -66,9 +66,9 @@ class Lexer:
             for token, pattern in self.tokenExpressions.items():
                 text = match(pattern)
                 if text is not None:
-                    tokens.append((token, text))
+                    tokens.append(("Token: " + token, "Input: " + str(text)))
                     break
             else:
-                raise ValueError(f"Invalid character '{peek()}' at line {line_num}, column {pos - line_start}")
+                raise ValueError(f"Invalid character '{peek()}' at line {lineNr}, column {pos - lineStart}")
 
         return tokens
