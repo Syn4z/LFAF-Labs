@@ -1,3 +1,4 @@
 .idea/
 src/automaton/__pycache__/
 src/grammar/__pycache__/
+src/lexer/__pycache__/
