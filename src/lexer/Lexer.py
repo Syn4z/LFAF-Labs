@@ -66,7 +66,7 @@ class Lexer:
             for token, pattern in self.tokenExpressions.items():
                 text = match(pattern)
                 if text is not None:
-                    tokens.append(("Token: " + token, "Input: " + str(text)))
+                    tokens.append(("Input: " + str(text), "Token: " + token))
                     break
             else:
                 raise ValueError(f"Invalid character '{peek()}' at line {lineNr}, column {pos - lineStart}")
