@@ -9,7 +9,7 @@ if __name__ == '__main__':
     lexer = Lexer(input_string, tokensE)
     tokens = lexer.lex()
 
-    print("First segment: \n" + input_string + "\n")
+    print("Segment 1: \n" + input_string + "\n")
     for token in tokens:
         print(token)
 
@@ -20,6 +20,28 @@ if __name__ == '__main__':
     lexer = Lexer(input_string, tokensE)
     tokens = lexer.lex()
 
-    print("Second segment: \n" + input_string + "\n")
+    print("Segment 2: \n" + input_string + "\n")
+    for token in tokens:
+        print(token)
+
+    print('\n')
+
+    input_string = 'function alpha(): return true;'
+
+    lexer = Lexer(input_string, tokensE)
+    tokens = lexer.lex()
+
+    print("Segment 3: \n" + input_string + "\n")
+    for token in tokens:
+        print(token)
+
+    print('\n')
+
+    input_string = 'while(a != 0 || a = !b): sum = a + b return sum'
+
+    lexer = Lexer(input_string, tokensE)
+    tokens = lexer.lex()
+
+    print("Segment 4: \n" + input_string + "\n")
     for token in tokens:
         print(token)

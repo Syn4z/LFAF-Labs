@@ -14,7 +14,6 @@ class Token:
         'SEMICOLON': r';',
         'COLON': r':',
         'COMMA': r',',
-        'IDENTIFIER': r'[a-zA-Z_][a-zA-Z0-9_]*',
         'EQUALS': r'==',
         'NOT_EQUALS': r'!=',
         'LESS_THAN': r'<',
@@ -32,10 +31,5 @@ class Token:
         'NOT': r'!',
         'TRUE': r'true',
         'FALSE': r'false',
+        'IDENTIFIER': r'[a-zA-Z_][a-zA-Z0-9_]*',
     }
-
-    def getType(self):
-        return self.tokens.keys()
-
-    def getLexeme(self):
-        return self.tokens.values()
