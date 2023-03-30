@@ -1,7 +1,7 @@
 # Laboratory Work Nr.3
 
 ### Course: Formal Languages & Finite Automata
-### Author: Iatco Sorin
+### Author: Iațco Sorin
 
 ----
 
