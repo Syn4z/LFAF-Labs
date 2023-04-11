@@ -1,47 +1,10 @@
-from src.lexer.Lexer import Lexer
-from src.lexer.Token import Token
+from src.grammar.Grammar import Grammar
 
 if __name__ == '__main__':
 
-    input_string = 'x = 3 + 4 * 2; y = x / (5 - 2);'
-    tokensE = Token.tokens
+    grammar = Grammar(
+        'S', ['a', 'b', 'd'], ['S', 'A', 'B', 'C', 'D'], {'S': ['dB', 'AC'],
+                                                          'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC'], 'D': ['ab'],
+                                                          'C': ['bC', 'ε']})
 
-    lexer = Lexer(input_string, tokensE)
-    tokens = lexer.lex()
-
-    print("Segment 1: \n" + input_string + "\n" + "\nTokens:")
-    for token in tokens:
-        print(token)
-
-    print('\n')
-
-    input_string = 'if (z > y && x == 1): a = true else: print("Wrong", b)'
-
-    lexer = Lexer(input_string, tokensE)
-    tokens = lexer.lex()
-
-    print("Segment 2: \n" + input_string + "\n" + "\nTokens:")
-    for token in tokens:
-        print(token)
-
-    print('\n')
-
-    input_string = 'function alpha(): return 1, true'
-
-    lexer = Lexer(input_string, tokensE)
-    tokens = lexer.lex()
-
-    print("Segment 3: \n" + input_string + "\n" + "\nTokens:")
-    for token in tokens:
-        print(token)
-
-    print('\n')
-
-    input_string = 'while(a != 0 || a == !b): sum = a + b return sum'
-
-    lexer = Lexer(input_string, tokensE)
-    tokens = lexer.lex()
-
-    print("Segment 4: \n" + input_string + "\n" + "\nTokens:")
-    for token in tokens:
-        print(token)
+    print(grammar.toChomskyNormalForm())

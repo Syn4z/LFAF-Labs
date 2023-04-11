@@ -112,3 +112,61 @@ class Grammar:
 
         # If the grammar does not fit into any of the types, return None
         return 'Type None'
+
+    def toChomskyNormalForm(self):
+        # Remove all epsilon productions
+        self.removeEpsilon()
+
+        # Remove all unit productions
+        self.removeUnit()
+
+        # Remove all inaccessible productions
+        self.removeInaccessible()
+
+        # Remove all non-productive productions
+        self.removeNonProductive()
+
+        return self.productions
+
+    def removeEpsilon(self):
+        epsilon = set()
+        for variable, productions in self.productions.items():
+            if "ε" in productions:
+                epsilon.add(variable)
+
+        for left, right in self.productions.items():
+            for i in right:
+                for j in epsilon:
+                    if j in i:
+                        if left == j:
+                            break
+                        self.productions[left] = [x.replace(j, "") for x in self.productions[left]]
+                        self.productions[left].append(i)
+
+        return self.productions
+
+    def removeUnit(self):
+        for left, right in self.productions.items():
+            # In m variant I have no inner loops occurring, so I can just replace the unit productions
+            # with the right hand side of the specific production
+            for e in right:
+                if len(e) == 1 and e in self.nonTerminal:
+                    self.productions[left].remove(e)
+                    self.productions[left].extend(self.productions[e])
+                    self.removeUnit()
+
+        return self.productions
+
+    def removeInaccessible(self):
+        reachable = set()
+        reachable.add(self.startSymbol)
+
+        while reachable is not None:
+            symbol = reachable.pop()
+            if symbol not in reachable:
+                reachable.add(symbol)
+                product = self.productions[symbol]
+
+    def removeNonProductive(self):
+                # TO DO
+        return None
