@@ -121,10 +121,10 @@ class Grammar:
         self.removeUnit()
 
         # Remove all inaccessible productions
-        self.removeInaccessible()
+        #self.removeInaccessible()
 
         # Remove all non-productive productions
-        self.removeNonProductive()
+        #self.removeNonProductive()
 
         return self.productions
 
@@ -142,6 +142,8 @@ class Grammar:
                             break
                         self.productions[left] = [x.replace(j, "") for x in self.productions[left]]
                         self.productions[left].append(i)
+                    elif i == "ε":
+                        self.productions[left].remove(i)
 
         return self.productions
 
@@ -168,5 +170,18 @@ class Grammar:
                 product = self.productions[symbol]
 
     def removeNonProductive(self):
-                # TO DO
-        return None
+        productive = {self.startSymbol}
+        old_size = 0
+        while len(productive) > old_size:
+            old_size = len(productive)
+            for left, right in self.productions.items():
+                if left in productive:
+                    for prod in right:
+                        if all(s in productive for s in prod):
+                            productive.add(left)
+                            break
+        self.nonTerminal = [s for s in self.nonTerminal if s in productive]
+        self.productions = {left: [prod for prod in right if all(s in productive for s in prod)] for left, right in
+                            self.productions.items() if left in productive}
+
+        return self.productions
