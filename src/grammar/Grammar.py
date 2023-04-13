@@ -121,10 +121,10 @@ class Grammar:
         self.removeUnit()
 
         # Remove all inaccessible productions
-        #self.removeInaccessible()
+        self.removeInaccessible()
 
         # Remove all non-productive productions
-        #self.removeNonProductive()
+        # self.removeNonProductive()
 
         return self.productions
 
@@ -160,28 +160,45 @@ class Grammar:
         return self.productions
 
     def removeInaccessible(self):
-        reachable = set()
-        reachable.add(self.startSymbol)
+        # First, find all symbols that are reachable from the start symbol
+        accessible = set()
+        for left, right in self.productions.items():
+            for r in right:
+                for w in r:
+                    accessible.add(w)
 
-        while reachable is not None:
-            symbol = reachable.pop()
-            if symbol not in reachable:
-                reachable.add(symbol)
-                product = self.productions[symbol]
+        for left, right in self.productions.items():
+            for a in left:
+                if a in accessible:
+                    continue
+                else:
+                    del self.productions[a]
+                    return self.productions
+
+        return self.productions
 
     def removeNonProductive(self):
-        productive = {self.startSymbol}
-        old_size = 0
-        while len(productive) > old_size:
-            old_size = len(productive)
-            for left, right in self.productions.items():
-                if left in productive:
-                    for prod in right:
-                        if all(s in productive for s in prod):
-                            productive.add(left)
+        # Find all productive symbols
+        productive_symbols = set(self.terminal)
+        old_productive_symbols = set()
+        while old_productive_symbols != productive_symbols:
+            old_productive_symbols = set(productive_symbols)
+            for nt, prods in self.productions.items():
+                if nt in productive_symbols:
+                    for prod in prods:
+                        if all(s in productive_symbols for s in prod):
+                            productive_symbols.add(nt)
                             break
-        self.nonTerminal = [s for s in self.nonTerminal if s in productive]
-        self.productions = {left: [prod for prod in right if all(s in productive for s in prod)] for left, right in
-                            self.productions.items() if left in productive}
+        # Eliminate all non-productive symbols
+        new_productions = {}
+        for nt, prods in self.productions.items():
+            if nt in productive_symbols:
+                new_prods = []
+                for prod in prods:
+                    if all(s in productive_symbols for s in prod):
+                        new_prods.append(prod)
+                new_productions[nt] = new_prods
+        self.nonTerminal = list(productive_symbols)
+        self.productions = new_productions
 
         return self.productions
