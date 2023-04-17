@@ -1,6 +1,6 @@
 # Laboratory Work Nr.4
 
-### Topic: Chomsky Normal Form
+## Topic: Chomsky Normal Form
 ### Course: Formal Languages & Finite Automata
 ### Author: Iațco Sorin
 ### Variant: 21
@@ -174,8 +174,9 @@ def toChomskyNormalForm(self):
 ```
 
 ### UnitTest()
-In this class are all the unit tests for the functions implemented in the previous classes. The tests are performed on all
-the functions, and the results are printed in the console. All the tests are methods.
+In this class are all the unit tests for the functions implemented in the previous classes Grammar()
+and FiniteAutomaton(). The tests are performed on all the functions, and the results are printed in the console.
+All the tests are methods of this class, each method testing a specific function.
 
 ```
 class UnitTest(unittest.TestCase):
@@ -204,7 +205,7 @@ Next, implementing Chomsky Normal Form requires a good understanding of the prin
 specific steps involved in the conversion process. The code provided in the laboratory work demonstrates how the 
 necessary functions can be implemented in a programming language to automate the conversion process.
 
-Lastly, in this laboratory work I managed to implement with success all the task required and to obtain the Chomsky Normal
+Lastly, in this laboratory work, I managed to implement with success all the task required and to obtain the Chomsky Normal
 Form for the given grammar.
 
 ### Results
@@ -257,7 +258,6 @@ Non-terminal:  ['S', 'A', 'B']
 
 Productions:  {'S': ['B', 'A', 'd', 'S', 'a'], 'A': ['d', 'S', 'a'], 'B': ['a', 'A', 'd', 'S']}
 
-----------------------
 ----------------------
 
 Chomsky Normal Form:
