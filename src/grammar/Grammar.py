@@ -116,15 +116,19 @@ class Grammar:
     def toChomskyNormalForm(self):
         # Remove all epsilon productions
         self.removeEpsilon()
+        print("After removing epsilon: ", self.productions)
 
         # Remove all unit productions
         self.removeUnit()
+        print("After removing unit productions: ", self.productions)
 
         # Remove all inaccessible productions
         self.removeInaccessible()
+        print("After removing inaccessible: ", self.productions)
 
         # Remove all non-productive productions
-        # self.removeNonProductive()
+        self.removeNonProductive()
+        print("After removing non-productive: ", self.productions)
 
         return self.productions
 
@@ -149,7 +153,7 @@ class Grammar:
 
     def removeUnit(self):
         for left, right in self.productions.items():
-            # In m variant I have no inner loops occurring, so I can just replace the unit productions
+            # In my variant I have no inner loops occurring, so I can just replace the unit productions
             # with the right hand side of the specific production
             for e in right:
                 if len(e) == 1 and e in self.nonTerminal:
@@ -178,27 +182,54 @@ class Grammar:
         return self.productions
 
     def removeNonProductive(self):
-        # Find all productive symbols
-        productive_symbols = set(self.terminal)
-        old_productive_symbols = set()
-        while old_productive_symbols != productive_symbols:
-            old_productive_symbols = set(productive_symbols)
-            for nt, prods in self.productions.items():
-                if nt in productive_symbols:
-                    for prod in prods:
-                        if all(s in productive_symbols for s in prod):
-                            productive_symbols.add(nt)
-                            break
-        # Eliminate all non-productive symbols
+        '''
+        print(self.productions)
         new_productions = {}
-        for nt, prods in self.productions.items():
-            if nt in productive_symbols:
-                new_prods = []
-                for prod in prods:
-                    if all(s in productive_symbols for s in prod):
-                        new_prods.append(prod)
-                new_productions[nt] = new_prods
-        self.nonTerminal = list(productive_symbols)
+        for left, right in self.productions.items():
+            new_right = []
+            for r in right:
+                print(r)
+                if r.isupper() or r.islower():
+                    new_right.append(r)
+                else:
+                    continue
+            if new_right:
+                new_productions[left] = new_right
+
         self.productions = new_productions
+        '''
+        productive = set()
+
+        for left, right in self.productions.items():
+            for r in right:
+                if r in self.terminal:
+                    productive.add(left)
+
+        for left, right in self.productions.items():
+            new_right = []
+            for lt in left:
+                if lt not in productive:
+                    del self.productions[lt]
+                    return self.productions
+            for r in right:
+                if len(r) > 1:
+                    for w in r:
+                        if w in self.nonTerminal:
+                            if w in new_right:
+                                break
+                            elif w not in productive:
+                                new_right.append(r.replace(w, ""))
+                        elif w in self.terminal and w not in self.productions[left]:
+                            new_right.append(r.replace(r, w))
+                        elif w in self.terminal and w in self.productions[left]:
+                            if len(r) > 2:
+                                continue
+                            new_right.append(r.replace(w, ""))
+                        else:
+                            continue
+                else:
+                    new_right.append(r)
+
+            self.productions[left] = new_right
 
         return self.productions

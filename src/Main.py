@@ -14,4 +14,5 @@ if __name__ == '__main__':
 
     grammar = Grammar(startingCharacter, terminal, nonTerminal, productions)
 
-    print(grammar.toChomskyNormalForm())
+    print("Initial productions:", grammar.productions)
+    print("Chomsky Normal Form:", grammar.toChomskyNormalForm())
