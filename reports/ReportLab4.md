@@ -8,7 +8,18 @@
 ----
 
 ## Theory
-TO DO
+In formal language theory, a context-free grammar G is said to be in Chomsky normal form if all of its production rules are of the form:
+
+A → BC,   or
+A → a,   or
+S → ε,
+
+Where A, B, and C are non-terminal symbols, an is a terminal symbol,
+S is the start symbol, and ε denotes the empty string. Also, neither B nor C may be the start symbol, and the third 
+production rule can only appear if ε is in L(G), the language produced by the context-free grammar G.
+
+Every grammar in Chomsky normal form is context-free, and conversely, every context-free grammar can be transformed into
+an equivalent one which is in Chomsky normal form and has a size no larger than the square of the original grammar's size.
 
 ## Objectives:
 
@@ -23,234 +34,244 @@ TO DO
 
 ## Implementation description
 
-### Lexer class
-This code defines a class called Lexer that is used to break down an input string into a sequence of tokens based on a 
-set of predefined regular expression patterns. The Lexer class takes two parameters in its constructor: the input string
-to be tokenized and a dictionary of token expressions, where each key-value pair represents a token name and its 
-corresponding regular expression pattern.
+### removeEpsilon()
+This function first identifies which variables can derive epsilon by searching for the symbol "ε" in the right-hand side
+of each production rule. These variables are stored in the set "epsilon".
 
-```
-class Lexer:
-    def __init__(self, inputString, tokenExpressions):
-        self.inputString = inputString
-        self.tokenExpressions = tokenExpressions
-```
+Next, the function iterates over each production rule and each symbol on the right-hand side of that rule. For each 
+symbol that contains a variable that can derive epsilon, the algorithm replaces that variable with the empty string and
+adds the modified symbol to the right-hand side of the production rule. If the current symbol is already epsilon, it is 
+simply removed from the right-hand side of the production rule.
 
-### Lexer methods
-The Lexer class defines a method called lex() that generates the tokens from the input string. The method works by 
-iterating over the input string and checking each character against the predefined regular expression patterns. If a 
-match is found, the corresponding token is added to a list of tokens, along with the matched text.
-
-The lex() method uses several helper functions to handle different aspects of the tokenization process. The getChar() 
-function is used to retrieve the next character from the input string, while the peek() function is used to peek at the
-next character without consuming it. The skip_whitespace() function is used to skip over any whitespace and comments in 
-the input string, while the match() function is used to match a regular expression pattern and return the matched text.
-
-```
-        def getChar():
-            nonlocal pos
-            if pos >= len(self.inputString):
-                return None
-            c = self.inputString[pos]
-            pos += 1
-            return c
-
-        def peek():
-            nonlocal pos
-            if pos >= len(self.inputString):
-                return None
-            return self.inputString[pos]
-
-        def skip_whitespace():
-            nonlocal line_num, line_start
-            while True:
-                c = peek()
-                if c is None:
-                    return
-                if c.isspace():
-                    if c == '\n':
-                        line_num += 1
-                        line_start = pos
-                    getChar()
-                elif c == '#':
-                    while c is not None and c != '\n':
-                        c = getChar()
-                else:
-                    return
-
-        def match(pattern):
-            nonlocal pos
-            m = re.match(pattern, self.inputString[pos:])
-            if m is not None:
-                content = m.group(0)
-                pos += len(content)
-                return content
-            else:
-                return None
-```
-
-### Lexer logic
-The lex() method uses a while loop to iterate over the input string and generate tokens. It first calls skip_whitespace()
-to skip over any whitespace and comments. It then checks if there are any characters left in the input string. If not, 
-the loop breaks and the method returns the list of tokens. If there are characters left, the method iterates over each 
-token expression in the dictionary and attempts to match it against the input string using the match() function. If a 
-match is found, the corresponding token is added to the list of tokens and the loop breaks. If no match is found, an 
-error is raised indicating that an invalid character was encountered at a specific line and column in the input string.
-
-```
-        while True:
-            skip_whitespace()
-            if peek() is None:
-                break
-            for token, pattern in self.tokenExpressions.items():
-                text = match(pattern)
-                if text is not None:
-                    tokens.append((token, text))
-                    break
-            else:
-                raise ValueError(f"Invalid character '{peek()}' at line {line_num}, column {pos - line_start}")
-
-        return tokens  
-```
-
-### Token
-The class called Token has a dictionary 'tokens' as a class attribute. The tokens dictionary maps names of tokens
-to their corresponding regular expressions. The regular expressions defined in the tokens dictionary are used to match 
-and identify tokens in the input source code.
 ```
 ...
-tokens = {
-        'NUMBER': r'\d+(\.\d+)?',
-        'PLUS': r'\+',
-        'MINUS': r'\-',
-        'TIMES': r'\*',
-        'DIVIDE': r'/',
-        'LPAREN': r'\(',
-        'RPAREN': r'\)',
-        'ASSIGN': r'=',
-        'SEMICOLON': r';',
-        'COLON': r':',
+for variable, productions in self.productions.items():
+            if "ε" in productions:
+                epsilon.add(variable)
+
+        for left, right in self.productions.items():
+            for i in right:
+                for j in epsilon:
+                    if j in i:
+                        if left == j:
+                            break
+                        self.productions[left] = [x.replace(j, "") for x in self.productions[left]]
+                        self.productions[left].append(i)
+                    elif i == "ε":
+                        self.productions[left].remove(i)
+        ...                
+```
+
+### removeUnit()
+The method is for removing the unit productions, contains a "for" loop that iterates over the dictionary "productions", which stores the set of 
+production rules.
+
+Inside the "for" loop, there's another "for" loop that iterates over each right-hand side sequence in the current 
+production rule. If the sequence contains only one symbol (i.e., it's a unit production) and that symbol is a non-terminal,
+the method performs a replacement operation: it removes the unit production from the current right-hand side and replaces
+it with the right-hand sides of the non-terminal it represents.
+
+The method then calls itself recursively, and returns the modified "productions" dictionary.
+
+```
+   ...
+        for left, right in self.productions.items():
+            # In my variant I have no inner loops occurring, so I can just replace the unit productions
+            # with the right hand side of the specific production
+            for e in right:
+                if len(e) == 1 and e in self.nonTerminal:
+                    self.productions[left].remove(e)
+                    self.productions[left].extend(self.productions[e])
+                    self.removeUnit()
+        ...            
+```
+
+### removeInaccessible()
+The function removes all the inaccessible symbols, first creates a set named accessible to hold all the accessible symbols. It then iterates over each 
+production in the object's productions dictionary and checks each symbol in the right-hand side of the production to see
+if it is accessible. If a symbol is accessible, it is added to the accessible set.
+
+After identifying all the accessible symbols, the method then iterates over each production again and checks each
+symbol on the left-hand side. If a symbol is not in the accessible set, it is deleted from the productions' dictionary. 
+If any symbols are deleted, the updated productions dictionary is returned.
+
+```
+   ...
+        for left, right in self.productions.items():
+            # For each production, iterate over each symbol in the right-hand side
+            for r in right:
+                for w in r:
+                    # If the symbol is accessible, add it to the 'accessible' set
+                    accessible.add(w)
+
+        # Iterate over each production in the 'productions' dictionary again
+        for left, right in self.productions.items():
+            # For each production, iterate over each symbol on the left-hand side
+            for a in left:
+                # If the symbol is accessible, continue to the next symbol
+                if a in accessible:
+                    continue
+                # If the symbol is not accessible, delete it from the 'productions' dictionary
+                else:
+                    del self.productions[a]
+                    del self.nonTerminal[self.nonTerminal.index(a)]
+                    # Return the updated 'productions' dictionary if any symbols are deleted
+                    return self.productions
+        ...            
+```
+
+### removeNonProductive()
+This function removes any unproductive symbols, first creates a set named productive to hold all the productive symbols. It then iterates over each 
+production in the object's productions dictionary and checks if any right-hand symbol is a terminal symbol. If it is, 
+the left-hand symbol is added to the productive set.
+
+After identifying all the productive symbols, the method iterates over each production again and checks each
+left-hand symbol. If a left-hand symbol is not in the productive set, it is deleted from the productions' dictionary. 
+If any symbols are deleted, the updated productions dictionary is returned.
+
+For each right-hand symbol, the method replaces any unproductive non-terminal symbols with empty strings. Additionally, 
+if a symbol is a terminal symbol and is not yet on the right-hand side, it is added. If a symbol is a terminal symbol
+and is already on the right-hand side, it is removed. Finally, the updated right-hand side symbols are added to a new list,
+which is then used to update the productions' dictionary.
+```
+      ...
+            for r in right:
+                if len(r) > 1:
+                    for w in r:
+                        if w in self.nonTerminal:
+                            if w in new_right:
+                                break
+                            elif w not in productive:
+                                new_right.append(r.replace(w, ""))
+                        elif w in self.terminal and w not in self.productions[left]:
+                            new_right.append(r.replace(r, w))
+                        elif w in self.terminal and w in self.productions[left]:
+                            if len(r) > 2:
+                                continue
+                            new_right.append(r.replace(w, ""))
+                        else:
+                            continue
+                else:
+                    new_right.append(r)
+            ...              
+```
+
+### toChomskyNormalForm()
+Finally, this function returns the converted grammar in the Chomsky Normal Form, with all the productions, terminal and
+non-terminal symbols respectively. It calls all the functions necessary for this procedure. 
+
+```
+def toChomskyNormalForm(self):
+        self.removeEpsilon()
+        print("\nAfter removing epsilon: \n" + "Terminal: ", self.terminal, "\nNon-terminal: ", self.nonTerminal,
+              "\nProductions: ", self.productions)
         ...
+        
+        self.removeNonProductive()
+        print("\nAfter removing non-productive: \n" + "Terminal: ", self.terminal, "\nNon-terminal: ", self.nonTerminal,
+              "\nProductions: ", self.productions)
+        ...
+```
+
+### UnitTest()
+In this class are all the unit tests for the functions implemented in the previous classes. The tests are performed on all
+the functions, and the results are printed in the console. All the tests are methods.
+
+```
+class UnitTest(unittest.TestCase):
+   ...
+   def test_grammar(self):
+        ...
+    
+    def test_to_chomsky_normal_form(self):
+        ...
+if __name__ == '__main__':
+    unittest.main()
 ```
 
 
 ## Conclusions / Results
 
 ### Conclusion
-In conclusion, this laboratory work proves that the crucial step in creating a compiler or interpreter for a computer language
-is the implementation of a lexer. I gain practical experience using regular expressions and creating software tools for 
-analyzing code in a laboratory setting by designing a lexer.
+In conclusion, implementing Chomsky Normal Form is an important step in simplifying and standardizing context-free 
+grammars for computational processing. The process involves several steps, including removing epsilon productions, 
+unit productions, inaccessible productions, and non-productive productions.
 
-By using a lexer, we learn how a compiler or interpreter's lexical analysis phase functions and how regular 
-expressions can be used to specify a computer language's grammar. Furthermore, I learn the value of error handling 
-and how to create a lexer that can identify and communicate input code mistakes.
+Firstly, by converting a context-free grammar into Chomsky Normal Form, we can ensure that it meets certain criteria for efficient
+parsing and processing, which is important in areas such as natural language processing and computational linguistics.
 
-Moreover, understanding the relationship between lexemes and tokens can help in building a lexer that can identify and
-classify different types of tokens in an input program. This is an important skill for me that helped in building a lexer
-with tokens and understand its functionality.
+Next, implementing Chomsky Normal Form requires a good understanding of the principles of context-free grammars and the 
+specific steps involved in the conversion process. The code provided in the laboratory work demonstrates how the 
+necessary functions can be implemented in a programming language to automate the conversion process.
 
-Finally, a lexer implementation is an essential component of a computer science or software engineering program because it 
-provides with hands-on practice in creating software tools for parsing and analyzing code. This type of practical
-experience was invaluable for me, as it helped me develop a deeper understanding of how programming languages work and 
-how they can be analyzed and manipulated.
+Lastly, in this laboratory work I managed to implement with success all the task required and to obtain the Chomsky Normal
+Form for the given grammar.
 
 ### Results
-Segment 1: 
-x = 3 + 4 * 2; y = x / (5 - 2);
+Initial Grammar: 
 
-Tokens:
+Terminal:  ['a', 'b', 'd']
 
-('Input: x', 'Token: IDENTIFIER')
-('Input: =', 'Token: ASSIGN')
-('Input: 3', 'Token: NUMBER')
-('Input: +', 'Token: PLUS')
-('Input: 4', 'Token: NUMBER')
-('Input: *', 'Token: TIMES')
-('Input: 2', 'Token: NUMBER')
-('Input: ;', 'Token: SEMICOLON')
-('Input: y', 'Token: IDENTIFIER')
-('Input: =', 'Token: ASSIGN')
-('Input: x', 'Token: IDENTIFIER')
-('Input: /', 'Token: DIVIDE')
-('Input: (', 'Token: LPAREN')
-('Input: 5', 'Token: NUMBER')
-('Input: -', 'Token: MINUS')
-('Input: 2', 'Token: NUMBER')
-('Input: )', 'Token: RPAREN')
-('Input: ;', 'Token: SEMICOLON')
+Non-terminal:  ['S', 'A', 'B', 'C', 'D']
+
+Productions:  {'S': ['dB', 'AC'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC'], 'D': ['ab'], 'C': ['bC', 'ε']}
+
+--------------------
 
 
-Segment 2: 
-if (z > y && x == 1): a = true else: print("Wrong", b)
+After removing epsilon:
 
-Tokens:
+Terminal:  ['a', 'b', 'd']
 
-('Input: if', 'Token: IF')
-('Input: (', 'Token: LPAREN')
-('Input: z', 'Token: IDENTIFIER')
-('Input: >', 'Token: GREATER_THAN')
-('Input: y', 'Token: IDENTIFIER')
-('Input: &&', 'Token: AND')
-('Input: x', 'Token: IDENTIFIER')
-('Input: ==', 'Token: EQUALS')
-('Input: 1', 'Token: NUMBER')
-('Input: )', 'Token: RPAREN')
-('Input: :', 'Token: COLON')
-('Input: a', 'Token: IDENTIFIER')
-('Input: =', 'Token: ASSIGN')
-('Input: true', 'Token: TRUE')
-('Input: else', 'Token: ELSE')
-('Input: :', 'Token: COLON')
-('Input: print', 'Token: IDENTIFIER')
-('Input: (', 'Token: LPAREN')
-('Input: "', 'Token: QUOTATION')
-('Input: Wrong', 'Token: IDENTIFIER')
-('Input: "', 'Token: QUOTATION')
-('Input: ,', 'Token: COMMA')
-('Input: b', 'Token: IDENTIFIER')
-('Input: )', 'Token: RPAREN')
+Non-terminal:  ['S', 'A', 'B', 'C', 'D']
 
+Productions:  {'S': ['dB', 'A', 'AC'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'A', 'AC'], 'D': ['ab'], 'C': ['bC']}
 
-Segment 3: 
-function alpha(): return 1, true
+--------------------
 
-Tokens:
+After removing unit productions:
 
-('Input: function', 'Token: FUNCTION')
-('Input: alpha', 'Token: IDENTIFIER')
-('Input: (', 'Token: LPAREN')
-('Input: )', 'Token: RPAREN')
-('Input: :', 'Token: COLON')
-('Input: return', 'Token: RETURN')
-('Input: 1', 'Token: NUMBER')
-('Input: ,', 'Token: COMMA')
-('Input: true', 'Token: TRUE')
+Terminal:  ['a', 'b', 'd']
 
+Non-terminal:  ['S', 'A', 'B', 'C', 'D']
 
-Segment 4: 
-while(a != 0 || a == !b): sum = a + b return sum
+Productions:  {'S': ['dB', 'AC', 'd', 'dS', 'aBdB'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC', 'd', 'dS', 'aBdB'], 'D': ['ab'], 'C': ['bC']}
 
-Tokens:
+--------------------
 
-('Input: while', 'Token: WHILE')
-('Input: (', 'Token: LPAREN')
-('Input: a', 'Token: IDENTIFIER')
-('Input: !=', 'Token: NOT_EQUALS')
-('Input: 0', 'Token: NUMBER')
-('Input: ||', 'Token: OR')
-('Input: a', 'Token: IDENTIFIER')
-('Input: ==', 'Token: EQUALS')
-('Input: !', 'Token: NOT')
-('Input: b', 'Token: IDENTIFIER')
-('Input: )', 'Token: RPAREN')
-('Input: :', 'Token: COLON')
-('Input: sum', 'Token: IDENTIFIER')
-('Input: =', 'Token: ASSIGN')
-('Input: a', 'Token: IDENTIFIER')
-('Input: +', 'Token: PLUS')
-('Input: b', 'Token: IDENTIFIER')
-('Input: return', 'Token: RETURN')
-('Input: sum', 'Token: IDENTIFIER')
+After removing inaccessible:
+
+Terminal:  ['a', 'b', 'd']
+
+Non-terminal:  ['S', 'A', 'B', 'C']
+
+Productions:  {'S': ['dB', 'AC', 'd', 'dS', 'aBdB'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC', 'd', 'dS', 'aBdB'], 'C': ['bC']}
+
+--------------------
+
+After removing non-productive:
+
+Terminal:  ['a', 'b', 'd']
+
+Non-terminal:  ['S', 'A', 'B']
+
+Productions:  {'S': ['B', 'A', 'd', 'S', 'a'], 'A': ['d', 'S', 'a'], 'B': ['a', 'A', 'd', 'S']}
+
+----------------------
+----------------------
+
+Chomsky Normal Form:
+
+Terminal:  ['a', 'b', 'd']
+
+Non-terminal:  ['S', 'A', 'B']
+
+Productions:  {'S': ['B', 'A', 'd', 'S', 'a'], 'A': ['d', 'S', 'a'], 'B': ['a', 'A', 'd', 'S']}
+
+### Unit Tests
+Ran 10 tests in 0.004s
+
+OK
 
 ## References
-https://github.com/DrVasile/FLFA-Labs/blob/master/3_LexerScanner/task.md
+https://github.com/DrVasile/FLFA-Labs/blob/master/4_ChomskyNormalForm/task.md
