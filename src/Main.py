@@ -1,21 +1,22 @@
-from src.grammar.Grammar import Grammar
+import re
+
+from src.lexer.Lexer import Lexer
+from src.lexer.Token import Token
+from src.parser.Parser import Parser
 
 if __name__ == '__main__':
 
-    startingCharacter = 'S'
-    nonTerminal = ['S', 'A', 'B', 'C', 'D']
-    terminal = ['a', 'b', 'd']
-    productions = {'S': ['dB', 'AC'],
-                   'A': ['d', 'dS', 'aBdB'],
-                   'B': ['a', 'aA', 'AC'],
-                   'D': ['ab'],
-                   'C': ['bC', 'ε']
-                   }
+    input_string = '3+-*/()==!==;":,<=><>=ifelsewhileforfunctionreturn&&||!truefalseidentifier'
+    tokensE = Token.tokens
+    tokens = re.findall(r'[\w.]+|[-+*/=();:]', input_string)
+    print(tokens)
 
-    grammar = Grammar(startingCharacter, terminal, nonTerminal, productions)
+    lexer = Lexer(input_string, tokensE)
+    token = lexer.lex()
 
-    print("\tInitial Grammar: " + "\nTerminal: ", grammar.terminal, "\nNon-terminal: ", grammar.nonTerminal,
-          "\nProductions: ", grammar.productions)
-    grammar.toChomskyNormalForm()
-    print("\n\tChomsky Normal Form:" + "\nTerminal: ", grammar.terminal, "\nNon-terminal: ", grammar.nonTerminal,
-          "\nProductions: ", grammar.productions)
+    number_3 = Parser(Lexer(input_string, tokensE))
+    print(number_3)
+
+    print("Segment 1: \n" + input_string + "\n" + "\nTokens:")
+    for token in token:
+        print(token)

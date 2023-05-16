@@ -3,3 +3,4 @@ src/automaton/__pycache__/
 src/grammar/__pycache__/
 src/lexer/__pycache__/
 src/unit_test/__pycache__/
+src/parser/__pycache__/
