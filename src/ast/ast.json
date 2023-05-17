@@ -12,11 +12,11 @@
             "value": "x"
         }
     },
-    "if_expr": {
+    "if_expression": {
         "type": "number",
         "value": 0.0
     },
-    "else_expr": {
+    "else_expression": {
         "type": "operation",
         "operator": "DIVIDE",
         "left": {

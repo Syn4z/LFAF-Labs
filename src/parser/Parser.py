@@ -101,6 +101,6 @@ class Parser:
             if else_token['type'] != 'ELSE':
                 raise ValueError('Expected "ELSE" after "IF" expression')
             else_expr = self.parse_expression()
-            return {'type': 'if-else', 'condition': condition, 'if_expr': if_expr, 'else_expr': else_expr}
+            return {'type': 'if-else', 'condition': condition, 'if_expression': if_expr, 'else_expression': else_expr}
         else:
             raise ValueError('Invalid token: ' + token['type'])
