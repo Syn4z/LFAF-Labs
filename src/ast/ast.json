@@ -1,0 +1,31 @@
+{
+    "type": "if-else",
+    "condition": {
+        "type": "operation",
+        "operator": "GREATER_THAN",
+        "left": {
+            "type": "number",
+            "value": 2.0
+        },
+        "right": {
+            "type": "identifier",
+            "value": "x"
+        }
+    },
+    "if_expr": {
+        "type": "number",
+        "value": 0.0
+    },
+    "else_expr": {
+        "type": "operation",
+        "operator": "DIVIDE",
+        "left": {
+            "type": "identifier",
+            "value": "x"
+        },
+        "right": {
+            "type": "number",
+            "value": 2.0
+        }
+    }
+}

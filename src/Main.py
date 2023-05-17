@@ -1,22 +1,27 @@
-import re
-
+import json
+import os
 from src.lexer.Lexer import Lexer
 from src.lexer.Token import Token
 from src.parser.Parser import Parser
 
 if __name__ == '__main__':
 
-    input_string = '3+-*/()==!==;":,<=><>=ifelsewhileforfunctionreturn&&||!truefalseidentifier'
+    input_string1 = 'if (2 > x) : 0 else x / 2'
+    input_string2 = 'a + 5 != !a / 3'
+    input_string3 = '"hello" + "world"'
+    input_string4 = 'a * 3; b - 9'
     tokensE = Token.tokens
-    tokens = re.findall(r'[\w.]+|[-+*/=();:]', input_string)
-    print(tokens)
 
-    lexer = Lexer(input_string, tokensE)
-    token = lexer.lex()
+    lexer = Lexer(input_string1, tokensE)
+    tokens = lexer.lex()
 
-    number_3 = Parser(Lexer(input_string, tokensE))
-    print(number_3)
+    parser = Parser(tokens)
+    ast = parser.parse_expression()
 
-    print("Segment 1: \n" + input_string + "\n" + "\nTokens:")
-    for token in token:
-        print(token)
+    directory = 'ast'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    filename = os.path.join(directory, 'ast.json')
+
+    with open(filename, 'w') as f:
+        json.dump(ast, f, indent=4)
