@@ -22,7 +22,7 @@ class Parser:
             next_token = self.peek()
             if next_token is None or next_token['type'] != 'SEMICOLON':
                 break
-            self.get()  # Consume the semicolon
+            self.get()
         if len(expressions) == 1:
             return expressions[0]
         else:

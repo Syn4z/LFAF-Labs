@@ -10,12 +10,10 @@ if __name__ == '__main__':
     input_string2 = 'a + 5 != !a / 3'
     input_string3 = '"hello" + "world"'
     input_string4 = 'a * 3; b - 9'
-    tokensE = Token.tokens
 
-    lexer = Lexer(input_string1, tokensE)
-    tokens = lexer.lex()
+    lexer = Lexer(input_string1, Token.tokens)
+    parser = Parser(lexer.lex())
 
-    parser = Parser(tokens)
     ast = parser.parse_expression()
 
     directory = 'ast'
