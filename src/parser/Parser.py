@@ -1,19 +1,23 @@
 class Parser:
+    # Initializes the parser with the list of tokens from lexer
     def __init__(self, tokens):
         self.tokens = tokens
         self.pos = 0
 
+    # Returns the next token in the list of tokens
     def peek(self):
         if self.pos >= len(self.tokens):
             return None
         return self.tokens[self.pos]
 
+    # Returns the next token in the list of tokens and increments the position
     def get(self):
         token = self.peek()
         if token is not None:
             self.pos += 1
         return token
 
+    # Parses the list of tokens and returns the AST
     def parse_expression(self):
         expressions = []
         while True:
@@ -28,6 +32,7 @@ class Parser:
         else:
             return {'type': 'block', 'expressions': expressions}
 
+    # Parses the comparison type tokens and returns the AST
     def parse_comparison(self):
         left = self.parse_term()
         while True:
@@ -39,6 +44,7 @@ class Parser:
             left = {'type': 'operation', 'operator': op['type'], 'left': left, 'right': right}
         return left
 
+    # Parses the algebra type tokens and returns the AST
     def parse_term(self):
         left = self.parse_factor()
         while True:
@@ -61,6 +67,7 @@ class Parser:
             left = {'type': 'operation', 'operator': op['type'], 'left': left, 'right': right}
         return left
 
+    # Parses the unary operations type tokens and returns the AST
     def parse_unary(self):
         op = self.peek()
         if op is not None and op['type'] in ['PLUS', 'MINUS', 'NOT']:
@@ -70,6 +77,7 @@ class Parser:
         else:
             return self.parse_primary()
 
+    # Parses the primary type tokens and returns the AST
     def parse_primary(self):
         token = self.get()
         if token['type'] == 'NUMBER':

@@ -7,270 +7,247 @@
 ----
 
 ## Theory
-In formal language theory, a context-free grammar G is said to be in Chomsky normal form if all of its production rules are of the form:
+Parsing, syntax analysis, or syntactic analysis is the process of analyzing a string of symbols, either in natural 
+language, computer languages or data structures, conforming to the rules of a formal grammar. The term parsing comes 
+from Latin pars (orationis), meaning part (of speech).
 
-A → BC,   or
-A → a,   or
-S → ε,
+An abstract syntax tree (AST), or just syntax tree is a tree representation of the abstract syntactic structure of 
+a text (often source code) written in a formal language. Each node of the tree denotes a construct occurring in the text.
 
-Where A, B, and C are non-terminal symbols, an is a terminal symbol,
-S is the start symbol, and ε denotes the empty string. Also, neither B nor C may be the start symbol, and the third 
-production rule can only appear if ε is in L(G), the language produced by the context-free grammar G.
-
-Every grammar in Chomsky normal form is context-free, and conversely, every context-free grammar can be transformed into
-an equivalent one which is in Chomsky normal form and has a size no larger than the square of the original grammar's size.
+The syntax is "abstract" in the sense that it does not represent every detail appearing in the real syntax, but rather
+just the structural or content-related details. For instance, grouping parentheses are implicit in the tree structure, 
+so these do not have to be represented as separate nodes. Likewise, a syntactic construct like an if-condition-then 
+statement may be denoted by means of a single node with three branches.
 
 ## Objectives:
 
-1. Learn about Chomsky Normal Form (CNF).
-2. Get familiar with the approaches of normalizing a grammar.
-3. Implement a method for normalizing an input grammar by the rules of CNF.
-   1. The implementation needs to be encapsulated in a method with an appropriate signature (also ideally in an appropriate class/type).
-   2. The implemented functionality needs executed and tested.
-   3. BONUS. Unit tests that validate the functionality of the project.
-   4. BONUS. Make the aforementioned function to accept any grammar, not only the one from the specific variant.
-
+1. Get familiar with parsing, what it is and how it can be programmed.
+2. Get familiar with the concept of AST.
+3. In addition to what has been done in the 3rd lab work, do the following:
+   1. In case if there is not a type that denotes, the possible types of tokens need to:
+      1. Have a type TokenType (like an enum) that can be used in the lexical analysis to categorize the tokens. 
+      2. Use regular expressions to identify the type of the token.
+   2. Implement the necessary data structures for an AST that could be used for the text processed in the 3rd lab work.
+   3. Implement a simple parser program that could extract the syntactic information from the input text.
 
 ## Implementation description
 
-### removeEpsilon()
-This function first identifies which variables can derive epsilon by searching for the symbol "ε" in the right-hand side
-of each production rule. These variables are stored in the set "epsilon".
+### Parser class
+The class Parser defines methods for parsing a sequence of tokens into an abstract syntax tree 
+(AST) representation of a Python expression or statement. The class initializes with an output tokens of the lexer with 
+ which then works on, makes all the operations and the output is then saved into a .json file. The class uses the following methods. 
 
-Next, the function iterates over each production rule and each symbol on the right-hand side of that rule. For each 
-symbol that contains a variable that can derive epsilon, the algorithm replaces that variable with the empty string and
-adds the modified symbol to the right-hand side of the production rule. If the current symbol is already epsilon, it is 
-simply removed from the right-hand side of the production rule.
+### peek() and get()
+The peek() method returns the next token in the list without consuming it, or None if there are no more tokens. 
+The get() method returns and consumes the next token in the list, or None if there are no more tokens.
 
-```
-...
-for variable, productions in self.productions.items():
-            if "ε" in productions:
-                epsilon.add(variable)
-
-        for left, right in self.productions.items():
-            for i in right:
-                for j in epsilon:
-                    if j in i:
-                        if left == j:
-                            break
-                        self.productions[left] = [x.replace(j, "") for x in self.productions[left]]
-                        self.productions[left].append(i)
-                    elif i == "ε":
-                        self.productions[left].remove(i)
-        ...                
-```
-
-### removeUnit()
-The method is for removing the unit productions, contains a "for" loop that iterates over the dictionary "productions", which stores the set of 
-production rules.
-
-Inside the "for" loop, there's another "for" loop that iterates over each right-hand side sequence in the current 
-production rule. If the sequence contains only one symbol (i.e., it's a unit production) and that symbol is a non-terminal,
-the method performs a replacement operation: it removes the unit production from the current right-hand side and replaces
-it with the right-hand sides of the non-terminal it represents.
-
-The method then calls itself recursively, and returns the modified "productions" dictionary.
+### parse_expression()
+This method parses a sequence of tokens into an AST node representing a Python expression. It handles multiple 
+expressions separated by semicolons and returns either a single expression node or a block node containing a list of expressions.
 
 ```
-   ...
-        for left, right in self.productions.items():
-            # In my variant I have no inner loops occurring, so I can just replace the unit productions
-            # with the right hand side of the specific production
-            for e in right:
-                if len(e) == 1 and e in self.nonTerminal:
-                    self.productions[left].remove(e)
-                    self.productions[left].extend(self.productions[e])
-                    self.removeUnit()
-        ...            
+def parse_expression(self):
+        expressions = []
+        while True:
+            expression = self.parse_comparison()
+            expressions.append(expression)
+            next_token = self.peek()
+            if next_token is None or next_token['type'] != 'SEMICOLON':
+                break
+            self.get()
+        if len(expressions) == 1:
+            return expressions[0]
+        else:
+            return {'type': 'block', 'expressions': expressions}  
 ```
 
-### removeInaccessible()
-The function removes all the inaccessible symbols, first creates a set named accessible to hold all the accessible symbols. It then iterates over each 
-production in the object's productions dictionary and checks each symbol in the right-hand side of the production to see
-if it is accessible. If a symbol is accessible, it is added to the accessible set.
-
-After identifying all the accessible symbols, the method then iterates over each production again and checks each
-symbol on the left-hand side. If a symbol is not in the accessible set, it is deleted from the productions' dictionary. 
-If any symbols are deleted, the updated productions dictionary is returned.
+### parse_comparison()
+This method parses a sequence of tokens into an AST node representing a Python comparison expression. It handles operators
+such as equals, not equals, less than, and greater than, and returns an operation node with the operator and the left 
+and right operands.
 
 ```
-   ...
-        for left, right in self.productions.items():
-            # For each production, iterate over each symbol in the right-hand side
-            for r in right:
-                for w in r:
-                    # If the symbol is accessible, add it to the 'accessible' set
-                    accessible.add(w)
-
-        # Iterate over each production in the 'productions' dictionary again
-        for left, right in self.productions.items():
-            # For each production, iterate over each symbol on the left-hand side
-            for a in left:
-                # If the symbol is accessible, continue to the next symbol
-                if a in accessible:
-                    continue
-                # If the symbol is not accessible, delete it from the 'productions' dictionary
-                else:
-                    del self.productions[a]
-                    del self.nonTerminal[self.nonTerminal.index(a)]
-                    # Return the updated 'productions' dictionary if any symbols are deleted
-                    return self.productions
-        ...            
+def parse_comparison(self):
+        left = self.parse_term()
+        while True:
+            op = self.peek()
+            if op is None or op['type'] not in ['EQUALS', 'NOT_EQUALS', 'LESS_THAN', 'GREATER_THAN']:
+                break
+            self.get()
+            right = self.parse_term()
+            left = {'type': 'operation', 'operator': op['type'], 'left': left, 'right': right}
+        return left
 ```
 
-### removeNonProductive()
-This function removes any unproductive symbols, first creates a set named productive to hold all the productive symbols. It then iterates over each 
-production in the object's productions dictionary and checks if any right-hand symbol is a terminal symbol. If it is, 
-the left-hand symbol is added to the productive set.
+### parse_term()
+It handles operators such as plus and minus, and returns an operation node with the operator and the left and right operands.
 
-After identifying all the productive symbols, the method iterates over each production again and checks each
-left-hand symbol. If a left-hand symbol is not in the productive set, it is deleted from the productions' dictionary. 
-If any symbols are deleted, the updated productions dictionary is returned.
-
-For each right-hand symbol, the method replaces any unproductive non-terminal symbols with empty strings. Additionally, 
-if a symbol is a terminal symbol and is not yet on the right-hand side, it is added. If a symbol is a terminal symbol
-and is already on the right-hand side, it is removed. Finally, the updated right-hand side symbols are added to a new list,
-which is then used to update the productions' dictionary.
-```
-      ...
-            for r in right:
-                if len(r) > 1:
-                    for w in r:
-                        if w in self.nonTerminal:
-                            if w in new_right:
-                                break
-                            elif w not in productive:
-                                new_right.append(r.replace(w, ""))
-                        elif w in self.terminal and w not in self.productions[left]:
-                            new_right.append(r.replace(r, w))
-                        elif w in self.terminal and w in self.productions[left]:
-                            if len(r) > 2:
-                                continue
-                            new_right.append(r.replace(w, ""))
-                        else:
-                            continue
-                else:
-                    new_right.append(r)
-            ...              
-```
-
-### toChomskyNormalForm()
-Finally, this function returns the converted grammar in the Chomsky Normal Form, with all the productions, terminal and
-non-terminal symbols respectively. It calls all the functions necessary for this procedure. 
+### parse_factor()
+This method handles operators such as times and divide, and returns an operation node with the operator and the left and right operands.
 
 ```
-def toChomskyNormalForm(self):
-        self.removeEpsilon()
-        print("\nAfter removing epsilon: \n" + "Terminal: ", self.terminal, "\nNon-terminal: ", self.nonTerminal,
-              "\nProductions: ", self.productions)
+def parse_factor(self):
+        left = self.parse_unary()
+        while True:
+            op = self.peek()
+            if op is None or op['type'] not in ['TIMES', 'DIVIDE']:
+                break
+            self.get()
+            right = self.parse_unary()
+            left = {'type': 'operation', 'operator': op['type'], 'left': left, 'right': right}
+        return left
+```
+
+### parse_unary()
+This method handles operators such as plus, minus, and not, and returns an operation node with the operator and the operand.
+
+```
+def parse_unary(self):
+        op = self.peek()
+        if op is not None and op['type'] in ['PLUS', 'MINUS', 'NOT']:
+            self.get()
+            operand = self.parse_unary()
+            return {'type': 'operation', 'operator': op['type'], 'operand': operand}
+        else:
+            return self.parse_primary()
+```
+
+### parse_primary()
+This method parses a sequence of tokens into an AST node representing a Python primary expression. It handles literals 
+such as numbers and strings, identifiers, parentheses, and if-else expressions, and returns the corresponding node type.
+
+```
+def parse_primary(self):
+        token = self.get()
+        if token['type'] == 'NUMBER':
+            return {'type': 'number', 'value': float(token['value'])}
+        elif token['type'] == 'IDENTIFIER':
+            return {'type': 'identifier', 'value': token['value']}
         ...
-        
-        self.removeNonProductive()
-        print("\nAfter removing non-productive: \n" + "Terminal: ", self.terminal, "\nNon-terminal: ", self.nonTerminal,
-              "\nProductions: ", self.productions)
-        ...
-```
-
-### UnitTest()
-In this class are all the unit tests for the functions implemented in the previous classes Grammar()
-and FiniteAutomaton(). The tests are performed on all the functions, and the results are printed in the console.
-All the tests are methods of this class, each method testing a specific function.
-
-```
-class UnitTest(unittest.TestCase):
-   ...
-   def test_grammar(self):
-        ...
-    
-    def test_to_chomsky_normal_form(self):
-        ...
-if __name__ == '__main__':
-    unittest.main()
+        elif token['type'] == 'IF':
+            ...
+            return {'type': 'if-else', 'condition': condition, 'if_expression': if_expr, 'else_expression': else_expr}
+        else:
+            raise ValueError('Invalid token: ' + token['type'])
 ```
 
 
 ## Conclusions / Results
 
 ### Conclusion
-In conclusion, implementing Chomsky Normal Form is an important step in simplifying and standardizing context-free 
-grammars for computational processing. The process involves several steps, including removing epsilon productions, 
-unit productions, inaccessible productions, and non-productive productions.
+In conclusion, implementing a parser that accepts tokens produced by a lexer and generates an Abstract Syntax Tree (AST)
+is a crucial step in the process of building a robust and efficient compiler or interpreter.
 
-Firstly, by converting a context-free grammar into Chomsky Normal Form, we can ensure that it meets certain criteria for efficient
-parsing and processing, which is important in areas such as natural language processing and computational linguistics.
+First of all, a lexer converts a stream of characters into tokens, which represent meaningful units in the programming 
+language. This step involves identifying keywords, identifiers, literals, and other language-specific elements. 
+Implementing a reliable lexer is essential for providing a consistent stream of tokens to the parser.
 
-Next, implementing Chomsky Normal Form requires a good understanding of the principles of context-free grammars and the 
-specific steps involved in the conversion process. The code provided in the laboratory work demonstrates how the 
-necessary functions can be implemented in a programming language to automate the conversion process.
+Secondly, the parser takes the token stream as input and constructs a hierarchical structure known as the Abstract Syntax 
+Tree (AST). The parser applies a set of grammar rules to determine the structure and relationships among the tokens. 
+Designing a grammar that accurately represents the language's syntax is critical for correct parsing.
 
-Lastly, in this laboratory work, I managed to implement with success all the task required and to obtain the Chomsky Normal
-Form for the given grammar.
+Third of all, the AST represents the syntactic structure of the source code, capturing its hierarchical relationships 
+and operator precedence. Each node in the AST corresponds to a language construct, such as a conditional statement, or 
+variable assignment. Building the AST involves creating and linking nodes based on the grammar rules and token relationships.
+
+Finally, implementing a parser that accepts tokens produced by a lexer and generates an AST is a critical component of 
+the compilation or interpretation process. It involves tokenization, parsing based on a grammar, constructing the AST, 
+semantic analysis, and more. By designing and implementing an effective parser, we can create powerful language tools that enable efficient execution or evaluation of programming code.
 
 ### Results
-Initial Grammar: 
+Input string: 'if (2 > x) : 0 else x / 2'
 
-Terminal:  ['a', 'b', 'd']
+Output:
+```
+{
+    {
+    "type": "if-else",
+    "condition": {
+        "type": "operation",
+        "operator": "GREATER_THAN",
+        "left": {
+            "type": "number",
+            "value": 2.0
+        },
+        "right": {
+            "type": "identifier",
+            "value": "x"
+        }
+    },
+    "if_expression": {
+        "type": "number",
+        "value": 0.0
+    },
+    "else_expression": {
+        "type": "operation",
+        "operator": "DIVIDE",
+        "left": {
+            "type": "identifier",
+            "value": "x"
+        },
+        "right": {
+            "type": "number",
+            "value": 2.0
+        }
+    }
+}
+```
 
-Non-terminal:  ['S', 'A', 'B', 'C', 'D']
+Input string: 'a + 5 != !a / 3'
 
-Productions:  {'S': ['dB', 'AC'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC'], 'D': ['ab'], 'C': ['bC', 'ε']}
+Output:
+```
+{
+    "type": "operation",
+    "operator": "NOT_EQUALS",
+    "left": {
+        "type": "operation",
+        "operator": "PLUS",
+        "left": {
+            "type": "identifier",
+            "value": "a"
+        },
+        "right": {
+            "type": "number",
+            "value": 5.0
+        }
+    },
+    "right": {
+        "type": "operation",
+        "operator": "DIVIDE",
+        "left": {
+            "type": "operation",
+            "operator": "NOT",
+            "operand": {
+                "type": "identifier",
+                "value": "a"
+            }
+        },
+        "right": {
+            "type": "number",
+            "value": 3.0
+        }
+    }
+}
+```
 
---------------------
+Input string: '"hello" + "world"'
 
-
-After removing epsilon:
-
-Terminal:  ['a', 'b', 'd']
-
-Non-terminal:  ['S', 'A', 'B', 'C', 'D']
-
-Productions:  {'S': ['dB', 'A', 'AC'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'A', 'AC'], 'D': ['ab'], 'C': ['bC']}
-
---------------------
-
-After removing unit productions:
-
-Terminal:  ['a', 'b', 'd']
-
-Non-terminal:  ['S', 'A', 'B', 'C', 'D']
-
-Productions:  {'S': ['dB', 'AC', 'd', 'dS', 'aBdB'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC', 'd', 'dS', 'aBdB'], 'D': ['ab'], 'C': ['bC']}
-
---------------------
-
-After removing inaccessible:
-
-Terminal:  ['a', 'b', 'd']
-
-Non-terminal:  ['S', 'A', 'B', 'C']
-
-Productions:  {'S': ['dB', 'AC', 'd', 'dS', 'aBdB'], 'A': ['d', 'dS', 'aBdB'], 'B': ['a', 'aA', 'AC', 'd', 'dS', 'aBdB'], 'C': ['bC']}
-
---------------------
-
-After removing non-productive:
-
-Terminal:  ['a', 'b', 'd']
-
-Non-terminal:  ['S', 'A', 'B']
-
-Productions:  {'S': ['B', 'A', 'd', 'S', 'a'], 'A': ['d', 'S', 'a'], 'B': ['a', 'A', 'd', 'S']}
-
-----------------------
-
-Chomsky Normal Form:
-
-Terminal:  ['a', 'b', 'd']
-
-Non-terminal:  ['S', 'A', 'B']
-
-Productions:  {'S': ['B', 'A', 'd', 'S', 'a'], 'A': ['d', 'S', 'a'], 'B': ['a', 'A', 'd', 'S']}
-
-### Unit Tests
-Ran 10 tests in 0.004s
-
-OK
+Output:
+```
+{
+    "type": "operation",
+    "operator": "PLUS",
+    "left": {
+        "type": "string",
+        "value": "hello"
+    },
+    "right": {
+        "type": "string",
+        "value": "world"
+    }
+}
+```
 
 ## References
-https://github.com/DrVasile/FLFA-Labs/blob/master/4_ChomskyNormalForm/task.md
+https://github.com/DrVasile/FLFA-Labs/blob/master/5_ParserASTBuild/task.md
